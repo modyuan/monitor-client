@@ -7,8 +7,8 @@
 UserWindow  * userWindow  = nullptr;
 FileOutput  * fileOutput  = nullptr;
 DeviceInput * deviceInput = nullptr;
+Upload      * upload      = nullptr;
 
-#include <time.h>
 int main() {
 
     avdevice_register_all();
@@ -20,8 +20,10 @@ int main() {
 
     puts("open device");
 
+    upload = new Upload("127.0.0.1",8000);
+
     //Open output
-    fileOutput = new FileOutput("/Users/yuan/Desktop/test",deviceInput);
+    fileOutput = new FileOutput(deviceInput,upload);
     fileOutput->OpenOutputStream();
 
     puts("open output");
@@ -30,13 +32,13 @@ int main() {
     deviceInput->GetInfo(w,h,c,s);
 
     // create show window
-    userWindow = new UserWindow();
-    userWindow->CreateWindow(w,h);
+    //userWindow = new UserWindow();
+    //userWindow->CreateWindow(w,h);
 
     puts("create window");
 
     deviceInput->SetVideoCB([](const AVFrame* frame){
-        userWindow->Refresh(frame->data[0],frame->linesize[0]);
+        //userWindow->Refresh(frame->data[0],frame->linesize[0]);
     });
 
     deviceInput->StartRecord();
@@ -46,7 +48,8 @@ int main() {
     fileOutput->StartWriteFileLoop();
 
 
-    userWindow->EventLoop();
+    this_thread::sleep_for(20s);
+    //userWindow->EventLoop();
 
     fileOutput->Close();
     puts("close file output");

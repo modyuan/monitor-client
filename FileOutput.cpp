@@ -17,19 +17,43 @@ number of audio samples (per channel) described by this frame
 
 #define error(msg) fprintf(stderr,"%s\n",msg);
 
-
 const int FPS = 30;
 const int AAC_FRAME_SIZE = 1024;
 const int GOP_SIZE = 10;
+const int FILE_BUFFER_SIZE = 1024*1024*2;
+const int IO_BUFFER_SIZE = 1024 * 50;
+
+
+void FileOutput::UpdateBuffer(int size) {
+    memcpy(fileBuffer + fileBufferUsage, ioBuffer, size);
+    fileBufferUsage+=size;
+    if(fileBufferUsage > FILE_BUFFER_SIZE){
+        fprintf(stderr,"FILE_BUFFER_SIZE is too small!!\n");
+        exit(-2);
+    }
+}
+
+extern "C" int write_packet(void* pThis,uint8_t* pBuf,int size){
+    auto fo = (FileOutput*)pThis;
+    fo->UpdateBuffer(size);
+    return size;
+}
+
 
 bool FileOutput::OpenOutputStream() {
-    int w,h,s,c;
+    int w,h,s,c,ret;
     deviceInput->GetInfo(w,h,c,s);
-    int ret;
-    oFormatCtx = nullptr;
 
-    ret = avformat_alloc_output_context2(&oFormatCtx,nullptr,"mpegts", nullptr);
-    if(ret < 0) { error("fail to alloc output format context."); return false;}
+    oFormatCtx = avformat_alloc_context();
+    oFormatCtx->oformat = av_guess_format( "mpegts", nullptr, nullptr);
+
+    ioBuffer= (uint8_t*)malloc(IO_BUFFER_SIZE);
+    fileBuffer = (uint8_t*)malloc(FILE_BUFFER_SIZE);
+    fileBufferUsage = 0;
+    oFormatCtx->flags = AVFMT_FLAG_CUSTOM_IO;
+    auto pIOCtx = avio_alloc_context(ioBuffer, IO_BUFFER_SIZE, 1, this, nullptr, write_packet, nullptr);
+
+    oFormatCtx->pb = pIOCtx;
 
 //-----video------
     AVCodec *videoCodec = avcodec_find_encoder(AV_CODEC_ID_H264);
@@ -96,12 +120,9 @@ bool FileOutput::OpenOutputStream() {
     return true;
 }
 
-bool FileOutput::OpenFile(const string &path) {
+bool FileOutput::OpenFile() {
 
-    if (avio_open(&oFormatCtx->pb, path.c_str(), AVIO_FLAG_WRITE) < 0) {
-        error("Failed to open output file.");
-        return false;
-    }
+    fileBufferUsage = 0;
     if(avformat_write_header(oFormatCtx, nullptr) < 0){
         error("fail to write header");
         return false;
@@ -110,13 +131,15 @@ bool FileOutput::OpenFile(const string &path) {
 }
 
 bool FileOutput::CloseFile() {
-    av_write_trailer(oFormatCtx);
+    int ret = av_write_trailer(oFormatCtx);
+    if(ret!=0){
+        error("fail to write trailer");
+        return false;
+    }
     avio_flush(oFormatCtx->pb);
-    bool ret = avio_close(oFormatCtx->pb) == 0;
-    if(!ret) fprintf(stderr,"fail to close file!");
+
     return ret;
 }
-
 
 
 int FileOutput::WriteVideoFrame(AVFrame *frame) {
@@ -198,12 +221,13 @@ int FileOutput::WriteAudioFrame(AVFrame *frame) {
 void FileOutput::StartWriteFileLoop(){
 
     writeFileLoopThread = new thread([this](){
-        char path[512]={0};
-        uint64_t fileCount = 0;
+        uint64_t fileCount = 1;
         while(running){
-            snprintf(path,512,"%s/%lld.ts",filePath.c_str(),fileCount + startTime);
-            WriteAFile(path,fileCount);
-            printf("->%s\n",path);
+
+            WriteAFile(fileCount);
+            printf("write file: %9lld\n",fileCount);
+
+            upload->SendVideo(fileBuffer,fileBufferUsage,fileCount + startTime);
             fileCount++;
 
         }
@@ -212,9 +236,10 @@ void FileOutput::StartWriteFileLoop(){
 
 }
 //index start with 1
-void FileOutput::WriteAFile(const string& filename,int index) {
+void FileOutput::WriteAFile(int index) {
 
-    this->OpenFile(filename);
+    this->fileBufferUsage = 0;
+    this->OpenFile();
 
     thread t1([this,index](){
         //puts("start");
@@ -261,6 +286,8 @@ void FileOutput::Close() {
 
     writeFileLoopThread->join();
 
+    free(fileBuffer);
+    free(ioBuffer);
     avcodec_free_context(&videoCodecCtx);
     avcodec_free_context(&audioCodecCtx);
 
@@ -269,6 +296,8 @@ void FileOutput::Close() {
     deviceInput = nullptr;
 
 }
+
+
 
 
 

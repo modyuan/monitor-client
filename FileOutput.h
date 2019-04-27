@@ -12,66 +12,70 @@
 #include <ctime>
 #include <atomic>
 #include "DeviceInput.h"
+#include "Upload.h"
 
 using namespace std;
 
 
-struct filePacket{
+struct filePacket {
     uint64_t index;
-    uint8_t* stream;
-    int      length;
+    uint8_t *stream;
+    int length;
 };
 
 class FileOutput {
 private:
-    string filePath; // place to store file
 
     AVFormatContext *oFormatCtx;
 
-    AVCodecContext* videoCodecCtx;
-    AVCodecContext* audioCodecCtx;
+    AVCodecContext *videoCodecCtx;
+    AVCodecContext *audioCodecCtx;
 
-    AVStream* videoStream;
-    AVStream* audioStream;
-
+    AVStream *videoStream;
+    AVStream *audioStream;
 
     atomic_uint64_t videoFrameCount;
     atomic_uint64_t audioFrameCount;
     AVPacket videoPkt;
     AVPacket audioPkt;
 
-    int frameSize;
-    int pointSize;
-
-    AVFrame* videoFrame;
-    AVFrame* audioFrame;
-
     uint64_t startTime;
-    queue<filePacket> outbuffer;
 
     atomic_bool running;
 
-    thread* writeFileLoopThread;
+    thread *writeFileLoopThread;
 
     mutex fileMutex;
 
-    DeviceInput* deviceInput;
+    uint8_t *ioBuffer;
+    uint8_t *fileBuffer;
+    int fileBufferUsage;
 
-    bool OpenFile(const string &path);
+    DeviceInput *deviceInput;
+    Upload *upload;
+
+    bool OpenFile();
     bool CloseFile();
-    //void ResetFrameCount(){videoFrameCount = audioFrameCount = 0;}
-
 
 public:
-    // path should not end with '/'
-    FileOutput(string path,DeviceInput *in):filePath(std::move(path)),deviceInput(in),running(true){};
-    bool OpenOutputStream();
-    int  WriteVideoFrame(AVFrame* frame);
-    int  WriteAudioFrame(AVFrame* frame);
 
-    void WriteAFile(const string& filename, int index);
+    void UpdateBuffer(int size);
+
+    // path should not end with '/'
+    FileOutput( DeviceInput *in, Upload *up) :
+            deviceInput(in), upload(up),
+            running(true) {};
+
+    bool OpenOutputStream();
+
+    int WriteVideoFrame(AVFrame *frame);
+
+    int WriteAudioFrame(AVFrame *frame);
+
+    void WriteAFile(int index);
 
     void StartWriteFileLoop();
+
     void Close();
 
 };

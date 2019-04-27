@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/stat.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <string>
 #include <cstdint>
@@ -26,9 +26,11 @@ private:
     string server_address;
     int port;
     int sockfd;
+
+    sockaddr_in serv_addr;
 public:
     Upload(string addr, int port);
-    bool SendVideo(string filename,uint64_t index);
+    bool SendVideo(uint8_t* stream,int length, uint64_t index);
     ~Upload();
 };
 

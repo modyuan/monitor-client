@@ -11,56 +11,48 @@ Upload::Upload(string addr, int port):server_address(addr),port(port) {
     if (sockfd < 0)
         error("opening socket");
 
-    sockaddr_in serv_addr;
+    auto server = gethostbyname(server_address.c_str());
 
     memset(&serv_addr,0,sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
 
-    uint32_t t = inet_addr(server_address.c_str());
-    if(t==-1){
-        error("fail to parse ip address");
-        exit(-1);
-    }
-    serv_addr.sin_addr.s_addr = t;
+    memcpy(&serv_addr.sin_addr.s_addr,server->h_addr,server->h_length);
     serv_addr.sin_port =htons(port);
 
-    if(connect(sockfd,(sockaddr*)&serv_addr,sizeof(serv_addr))== -1){
+    if(connect(sockfd,(sockaddr*)&serv_addr,sizeof(serv_addr))<0){
         error("connect socket");
         exit(-1);
+    }else{
+        printf("connect to server: %s:%d\n",server_address.c_str(),port);
     }
-
 }
 
-bool Upload::SendVideo(string filename,uint64_t index) {
+bool Upload::SendVideo(uint8_t* stream,int length, uint64_t index){
     const char header[500] = "POST /video/%lld.ts HTTP/1.1\r\n"
+                             "HOST: %s:%d\r\n"
                              "Accept: */*\r\n"
-                             "User-Agent: Raspberry\n"
-                             "Connection: Keep-Alive\r\n"
+                             "User-Agent: Raspberry\r\n"
+                             "Content-Type: video/mpegts\r\n"
+                             "Connection: keep-alive\r\n"
                              "Content-Length: %d\r\n\r\n";
 
-    char h[500];int ret;
 
-    int filesize = -1;
-    struct stat statbuff;
-    if(stat(filename.c_str(), &statbuff) < 0){
+    char h[500];
+    sprintf(h,header,index,server_address.c_str(),port,length);
+
+    //write header
+    int ret = send(sockfd,h,strlen(h),0);
+    if(ret<0){
+        error("fail write header");
         return false;
-    }else{
-        filesize = statbuff.st_size;
     }
 
-    FILE *fp = fopen(filename.c_str(),"rb");
-    if(!fp) return false;
-
-    sprintf(h,header,index,filesize);
-
-    if(write(sockfd,h,strlen(h))<0)
+    //write body
+    ret = send(sockfd,stream,length,0);
+    if(ret<0){
+        error("fail write body");
         return false;
-
-    auto fbuf = (uint8_t*)malloc(filesize);
-    fread(fbuf,1,filesize,fp);
-
-    if(write(sockfd,fbuf,filesize)<0)
-        return false;
+    }
 
     return true;
 }
