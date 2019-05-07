@@ -183,10 +183,8 @@ void DeviceInput::ThreadRecordAudio() {
         av_packet_unref(&packet);
 
         uint8_t **convertedBuffer = nullptr;
-        convertedBuffer = (uint8_t**)calloc(audioCodecCtx->channels,1);
-        convertedBuffer[0] = nullptr;
+        ret = av_samples_alloc_array_and_samples(&convertedBuffer, nullptr, audioCodecCtx->channels, frame->nb_samples, requireAudioFmt, 0);
 
-        ret = av_samples_alloc(convertedBuffer, nullptr, audioCodecCtx->channels, frame->nb_samples, requireAudioFmt, 0);
         if(ret<0){
             error("fail to alloc sample");
             exit(-11);

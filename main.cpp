@@ -32,13 +32,13 @@ int main() {
     deviceInput->GetInfo(w,h,c,s);
 
     // create show window
-    //userWindow = new UserWindow();
-    //userWindow->CreateWindow(w,h);
+    userWindow = new UserWindow();
+    userWindow->CreateWindow(w,h);
 
     puts("create window");
 
     deviceInput->SetVideoCB([](const AVFrame* frame){
-        //userWindow->Refresh(frame->data[0],frame->linesize[0]);
+        userWindow->Refresh(frame->data[0],frame->linesize[0]);
     });
 
     deviceInput->StartRecord();
@@ -48,8 +48,8 @@ int main() {
     fileOutput->StartWriteFileLoop();
 
 
-    this_thread::sleep_for(20s);
-    //userWindow->EventLoop();
+    //this_thread::sleep_for(20s);
+    userWindow->EventLoop();
 
     fileOutput->Close();
     puts("close file output");
