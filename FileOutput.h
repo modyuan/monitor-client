@@ -68,7 +68,7 @@ public:
 
     bool OpenOutputStream();
 
-    int WriteVideoFrame(AVFrame *frame);
+    int WriteVideoFrame(AVFrame *frame,bool forceI);
 
     int WriteAudioFrame(AVFrame *frame);
 

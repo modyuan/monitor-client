@@ -142,11 +142,13 @@ bool FileOutput::CloseFile() {
 }
 
 
-int FileOutput::WriteVideoFrame(AVFrame *frame) {
+int FileOutput::WriteVideoFrame(AVFrame *frame,bool forceI) {
     int ret;
 
     frame->pts = (uint64_t)videoFrameCount * videoStream->time_base.den / FPS + 10;
     videoFrameCount++;
+
+    //if(forceI) frame->pict_type = AV_PICTURE_TYPE_I;
 
     ret = avcodec_send_frame(videoCodecCtx,frame);
     assert(ret==0);
@@ -168,6 +170,7 @@ int FileOutput::WriteVideoFrame(AVFrame *frame) {
     videoPkt.stream_index = videoStream->index;
     videoPkt.duration = (uint64_t)videoStream->time_base.den / FPS;
     videoPkt.dts=  videoPkt.pts;
+
 
     fileMutex.lock();
     ret = av_interleaved_write_frame(oFormatCtx,&videoPkt);
@@ -243,11 +246,13 @@ void FileOutput::WriteAFile(int index) {
 
     thread t1([this,index](){
         //puts("start");
+        bool first = true;
         while(videoFrameCount.load() <  FPS * index){
             AVFrame* frame = this->deviceInput->GetVideoFrame();
             if(frame){
                 //printf("frame count: %lld\n",videoFrameCount.load());
-                this->WriteVideoFrame(frame);
+                this->WriteVideoFrame(frame,first);
+                first = false;
                 av_frame_free(&frame);
             }else{
                 this_thread::sleep_for(chrono::nanoseconds(1000*1000*30));
