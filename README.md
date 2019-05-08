@@ -14,3 +14,6 @@
 brew install ffmpeg
 brew install SDL2
 ```
+
+对应的服务端：
+[https://github.com/modyuan/monitor-server](https://github.com/modyuan/monitor-server)
