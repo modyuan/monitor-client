@@ -11,7 +11,7 @@ const int AAC_FRAME_SIZE = 1024;
 const int FPS = 30;
 
 //format in buffer.
-const AVSampleFormat requireAudioFmt = AV_SAMPLE_FMT_S16;
+const AVSampleFormat requireAudioFmt = AV_SAMPLE_FMT_FLTP;
 const AVPixelFormat requireVideoFmt = AV_PIX_FMT_YUV420P; // fill video buffer is still hardcode
 
 

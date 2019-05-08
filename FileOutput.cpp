@@ -86,7 +86,7 @@ bool FileOutput::OpenOutputStream() {
 
     avcodec_parameters_from_context(videoStream->codecpar,videoCodecCtx);
 //--------audio------
-    AVCodec *audioCodec = avcodec_find_encoder_by_name("libfdk_aac");
+    AVCodec *audioCodec = avcodec_find_encoder_by_name("aac");
     //AVCodec *audioCodec = avcodec_find_encoder(AV_CODEC_ID_AAC);
     if(audioCodec == nullptr){error("Can not find encoder AAC."); return false;}
 
