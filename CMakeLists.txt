@@ -8,8 +8,6 @@ if(APPLE)
     include_directories(/usr/local/include/)
     link_directories(/usr/local/lib/)
 
-    include_directories(/usr/local/Cellar/sdl2/2.0.9/include/)
-    link_directories(/usr/local/Cellar/sdl2/2.0.9/lib)
 elseif(UNIX)
     add_definitions(-DUNIX)
 

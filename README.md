@@ -7,3 +7,10 @@
 - [x] 进一步改为写文件到内存
 - [x] 网络上传
 - [ ] 接收服务器的指令
+
+
+安装依赖(MACOS)：
+```bash
+brew install ffmpeg
+brew install SDL2
+```
