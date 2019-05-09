@@ -9,7 +9,15 @@ FileOutput  * fileOutput  = nullptr;
 DeviceInput * deviceInput = nullptr;
 Upload      * upload      = nullptr;
 
-int main() {
+int main(int argc,char **argv) {
+    if(argc == 1){
+        printf("Usage:\n\t%s server-ip [port]\n",argv[0]);
+        exit(-1);
+    }
+
+    int port = 80;
+    if(argc == 3)  port = atoi(argv[2]);
+    printf("Ready to link server: %s:%d\n",argv[1],port);
 
     avdevice_register_all();
 
@@ -20,7 +28,9 @@ int main() {
 
     puts("open device");
 
-    upload = new Upload("127.0.0.1",8000);
+
+
+    upload = new Upload(argv[1],8000);
 
     //Open output
     fileOutput = new FileOutput(deviceInput,upload);

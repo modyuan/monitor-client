@@ -226,7 +226,7 @@ void FileOutput::StartWriteFileLoop(){
         while(running){
 
             WriteAFile(fileCount);
-            printf("write file: %9lld\n",fileCount);
+            //printf("write file: %9lld\n",fileCount);
 
             upload->SendVideo(fileBuffer,fileBufferUsage,fileCount + startTime);
             fileCount++;
