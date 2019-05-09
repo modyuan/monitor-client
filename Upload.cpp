@@ -1,7 +1,3 @@
-//
-// Created by yuansu on 2019-04-23.
-//
-
 #include "Upload.h"
 
 #define error(msg) fprintf(stderr,"ERROR %s\n",msg)

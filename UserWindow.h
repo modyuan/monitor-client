@@ -1,7 +1,3 @@
-//
-// Created by yuansu on 2019-04-09.
-//
-
 #ifndef FFMPEG_TEST_USERWINDOW_H
 #define FFMPEG_TEST_USERWINDOW_H
 

@@ -1,7 +1,3 @@
-//
-// Created by yuansu on 2019-04-23.
-//
-
 #ifndef FFMPEG_TEST_UPLOAD_H
 #define FFMPEG_TEST_UPLOAD_H
 

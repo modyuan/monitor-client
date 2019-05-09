@@ -1,7 +1,3 @@
-//
-// Created by yuansu on 2019-04-09.
-//
-
 #include "UserWindow.h"
 
 

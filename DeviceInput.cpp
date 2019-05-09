@@ -1,7 +1,3 @@
-//
-// Created by yuansu on 2019-04-16.
-//
-
 #include "DeviceInput.h"
 
 #define error(msg) fprintf(stderr,"%s\n",msg)

@@ -1,6 +1,3 @@
-//
-// Created by yuansu on 2019-04-16.
-//
 
 #ifndef FFMPEG_TEST_FILEOUTPUT_H
 #define FFMPEG_TEST_FILEOUTPUT_H
