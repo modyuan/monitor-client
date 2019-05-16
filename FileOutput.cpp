@@ -67,6 +67,7 @@ bool FileOutput::OpenOutputStream() {
     videoCodecCtx->time_base.num = 1;
     videoCodecCtx->time_base.den = 30;
     videoCodecCtx->gop_size = GOP_SIZE;
+    videoCodecCtx->bit_rate = 500* 1000;
 
 
     if(oFormatCtx->oformat->flags & AVFMT_GLOBALHEADER){

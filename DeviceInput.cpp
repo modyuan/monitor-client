@@ -249,6 +249,7 @@ void DeviceInput::ThreadRecordVideo() {
         vfLock.lock();
         if(videoFifo.size() >= BUF_SECONDS * FPS){
             videoFifo.pop();
+            fprintf(stderr, "videoBuffer is full, discard 1 frame.\n");
         }
         videoFifo.push(cFrame);
         vfLock.unlock();
