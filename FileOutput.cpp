@@ -229,8 +229,12 @@ void FileOutput::StartWriteFileLoop(){
             WriteAFile(fileCount);
             //printf("write file: %9lld\n",fileCount);
 
+            int64_t t1 = av_gettime();
             upload->SendVideo(fileBuffer,fileBufferUsage,fileCount + startTime);
             fileCount++;
+
+            int64_t t2 = av_gettime();
+            printf("up a file, use time: %6.2f ms\n",double(t2-t1)/1000.0);
 
         }
         puts("writefile loop exit");

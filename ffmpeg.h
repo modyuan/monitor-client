@@ -7,7 +7,7 @@ extern "C" {
 #include "libavutil/avutil.h"
 #include "libavutil/audio_fifo.h"
 #include "libavutil/imgutils.h"
-
+#include "libavutil/time.h"
 #include "libavdevice/avdevice.h"
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"

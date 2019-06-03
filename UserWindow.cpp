@@ -7,7 +7,7 @@ void UserWindow::CreateWindow(int width, int height) {
     }
     screen = SDL_CreateWindow("Video Player", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               width, height,
-                              SDL_WINDOW_OPENGL);
+                              SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
     if (!screen) {
         printf("SDL: could not create window - exiting:%s\n", SDL_GetError());
         return;

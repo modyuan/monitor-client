@@ -199,6 +199,7 @@ void DeviceInput::ThreadRecordAudio() {
         av_audio_fifo_write(audioFifo, (void **) convertedBuffer, frame->nb_samples);
         afLock.unlock();
         av_freep(&convertedBuffer[0]);
+        av_freep(&convertedBuffer);
 
         if (audioCB) audioCB(frame);
 
